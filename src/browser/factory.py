@@ -20,7 +20,7 @@ class BrowserFactory:
     @staticmethod
     def _create_windows_browser():
         options = EdgeOptions()
-        # options.add_argument("--headless")
+        options.add_argument("--headless")
         options.add_argument("--disable-gpu")
         options.add_argument("--window-size=1920,1080")
         
@@ -35,15 +35,13 @@ class BrowserFactory:
         options.add_argument("--disable-dev-shm-usage")
         options.add_argument("--disable-gpu")
         options.add_argument("--window-size=1920,1080")
-        # options.binary_location = "/usr/bin/chromium"
-
-        # return webdriver.Chrome(options=options)
         
         chrome_bin = (
             shutil.which("chromium")
             or shutil.which("chromium-browser")
             or shutil.which("google-chrome")
             or shutil.which("google-chrome-stable")
+            or shutil.which("/usr/bin/chromium")
         )
         if chrome_bin:
             options.binary_location = chrome_bin
