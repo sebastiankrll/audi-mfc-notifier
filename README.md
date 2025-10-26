@@ -11,7 +11,7 @@ Monitors Audi's MFC leasing pool for new available car models and sends notifica
 
 ## Prerequisites
 - Python 3.8+
-- Microsoft Edge (Windows) or Chrome/Chromium (Linux)
+- Microsoft Edge (Windows) or Chrome/Chromium (Linux) drivers
 - Telegram Bot
 - MFC (weare.audi) credentials
 
@@ -36,7 +36,35 @@ VTP_USERNAME=your_vtp_username
 VTP_PASSWORD=your_vtp_password
 ```
 
-4. Download WebDriver:
+4. Download & install WebDriver (detailed instructions below)
+
+## Usage
+
+1. Start the monitor:
+```sh
+python main.py
+```
+
+2. Telegram Bot Commands:
+- `/start` - Start monitoring
+- `/stop` - Stop monitoring
+- `/seturl <url>` - Set URL with filters
+- `/reset` - Clear previous results
+
+## Configuration
+
+Edit `src/config/settings.py` to modify:
+- Refresh interval (default: 5 seconds)
+- Scheduled check hours (default: 6:00 and 18:00 UTC)
+- Default MFC URL and filters
+
+## Notes
+- Keep the MFC URL format as: `https://vtp.audi.com/ademanlwb/i/s%7C<filters>`
+- The easiest way to set filters is to select the desired models in a browser and copy the URL
+- The bot requires an active internet connection
+- Ensure proper WebDriver version matches your browser version
+
+## Driver installation
 
 ### Windows (Microsoft Edge)
 1. Check your Edge version:
@@ -78,29 +106,3 @@ msedgedriver --version
 # Linux
 chromedriver --version
 ```
-
-## Usage
-
-1. Start the monitor:
-```sh
-python main.py
-```
-
-2. Telegram Bot Commands:
-- `/start` - Start monitoring
-- `/stop` - Stop monitoring
-- `/seturl <url>` - Set URL with filters
-- `/reset` - Clear previous results
-
-## Configuration
-
-Edit `src/config/settings.py` to modify:
-- Refresh interval (default: 5 seconds)
-- Scheduled check hours (default: 6:00 and 18:00 UTC)
-- Default MFC URL and filters
-
-## Notes
-- Keep the MFC URL format as: `https://vtp.audi.com/ademanlwb/i/s%7C<filters>`
-- The easiest way to set filters is to select the desired models in a browser and copy the URL
-- The bot requires an active internet connection
-- Ensure proper WebDriver version matches your browser version
