@@ -17,4 +17,4 @@ class Settings:
     
     # Monitoring Configuration
     REFRESH_INTERVAL: int = 5
-    SCHEDULED_CHECK_HOURS: List[int] = field(default_factory=lambda: [6, 18])  # UTC hours for scheduled checks
+    SCHEDULED_CHECK_INTERVAL: int = 3600 * 1

@@ -19,6 +19,8 @@ class BrowserMonitor:
         self._last_scheduled_run = {}
 
     def run(self):
+        self._log("Browser monitor started.")
+        
         while True:
             if not self.notifier.is_running():
                 time.sleep(self.settings.REFRESH_INTERVAL)
@@ -40,6 +42,13 @@ class BrowserMonitor:
 
             self._log("URL changed, cleared previous models.")
 
+    def _check_login_required(self) -> bool:
+        try:
+            login_button = self.driver.find_element(By.CLASS_NAME, "login-button")
+            return login_button.is_displayed()
+        except:
+            return False
+        
     def _do_login(self):
         self.driver.get("https://vtp.audi.com/ademanlwb/i/s/controller.do#filter/models")
 
@@ -55,21 +64,21 @@ class BrowserMonitor:
             time.sleep(2)
             self._log("Login performed.")
         except Exception:
-            self._log("Already logged in.")
+            self._log("Already logged in or login failed.")
 
     def _monitoring_loop(self):
         while self.notifier.is_running():
-            try:
-                self._check_scheduled_runs()
-                self._handle_reset_request()
-                self._handle_url_changes()
-                self._check_models()
+            if self._check_login_required():
+                self._log("Login required, performing login...")
+                self._do_login()
+                continue
 
-                time.sleep(self.settings.REFRESH_INTERVAL)
-                self._log("Page refreshed.")
-            except Exception:
-                self.notifier.notify_error(exc_info=sys.exc_info(), context="monitoring loop")
-                time.sleep(self.settings.REFRESH_INTERVAL)
+            self._check_scheduled_runs()
+            self._handle_reset_request()
+            self._handle_url_changes()
+            self._check_models()
+
+            # self._log("Page refreshed.")
 
     def _check_scheduled_runs(self):
         now = datetime.now(timezone.utc)
@@ -80,14 +89,13 @@ class BrowserMonitor:
                 self._last_scheduled_run[now.hour] = now.date()
         
     def _do_scheduled_check(self):
-        try:
-            self.driver.get("https://vtp.audi.com/ademanlwb/i/s/controller.do#filter/models")
-            div = self.driver.find_element(By.CSS_SELECTOR, ".vtp-resultcount span.num")
+        self.driver.get("https://vtp.audi.com/ademanlwb/i/s/controller.do#filter/models")
+        time.sleep(2)
+        
+        div = self.driver.find_element(By.CSS_SELECTOR, ".vtp-resultcount span.num")
 
-            self.notifier.send_notification(f"🕒  {time.strftime('%Y-%m-%d %H:%M:%S')}: {int(div.text.strip())} results found.")
-            self._log("Scheduled check completed.")
-        except Exception:
-            self.notifier.notify_error(exc_info=sys.exc_info(), context="scheduled check")
+        self.notifier.send_notification(f"🕒  {time.strftime('%Y-%m-%d %H:%M:%S')}: {int(div.text.strip())} results found.")
+        self._log("Scheduled check completed.")
 
     def _handle_reset_request(self):
         if self.notifier.is_reset_requested():
@@ -96,6 +104,7 @@ class BrowserMonitor:
 
     def _check_models(self):
         self.driver.get(self.current_url)
+        time.sleep(max(self.settings.REFRESH_INTERVAL, 2))
 
         parser = ModelParser(self.driver, self.previous_models)
         models = parser.parse_models_from_url(self.current_url)

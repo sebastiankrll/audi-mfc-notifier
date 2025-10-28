@@ -20,12 +20,9 @@ class ModelParser:
         codes = url.split("/i/s%7C")[1].split("/")[0].split(",")[1:]
         
         for code in codes:
-            try:
-                model = self._parse_single_model(code)
-                if model and model.count > 0 and model.name not in self.previous_models:
-                    models.append(model)
-            except Exception:
-                continue
+            model = self._parse_single_model(code)
+            if model and model.count > 0 and model.name not in self.previous_models:
+                models.append(model)
                 
         return models
 
