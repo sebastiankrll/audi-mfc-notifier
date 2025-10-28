@@ -1,0 +1,14 @@
+version: "3.8"
+services:
+  audi-mfc-notifier:
+    build: .
+    restart: unless-stopped
+    env_file:
+      - .env
+    volumes:
+      - ./logs:/home/appuser/app/logs
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"

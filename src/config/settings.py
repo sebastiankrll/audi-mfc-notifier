@@ -16,5 +16,5 @@ class Settings:
     PASSWORD: str = os.getenv("VTP_PASSWORD")
     
     # Monitoring Configuration
-    REFRESH_INTERVAL: int = 5
+    REFRESH_INTERVAL: int = 5 # min 5 seconds recommended
     SCHEDULED_CHECK_INTERVAL: int = 3600 * 1
