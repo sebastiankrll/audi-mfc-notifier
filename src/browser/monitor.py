@@ -16,7 +16,7 @@ class BrowserMonitor:
         self.settings = settings
         self.current_url = settings.URL
         self.previous_models = set()
-        self._last_scheduled_run = {}
+        self._last_scheduled_check = datetime.now(timezone.utc)
 
     def run(self):
         self._log("Browser monitor started.")
@@ -82,11 +82,11 @@ class BrowserMonitor:
 
     def _check_scheduled_runs(self):
         now = datetime.now(timezone.utc)
-        if now.hour in (6, 18) and now.minute == 0:
-            last_date = self._last_scheduled_run.get(now.hour)
-            if last_date != now.date():
-                self._do_scheduled_check()
-                self._last_scheduled_run[now.hour] = now.date()
+        time_since_last_check = (now - self._last_scheduled_check).total_seconds()
+
+        if time_since_last_check >= self.settings.SCHEDULED_CHECK_INTERVAL:
+            self._do_scheduled_check()
+            self._last_scheduled_check = now
         
     def _do_scheduled_check(self):
         self.driver.get("https://vtp.audi.com/ademanlwb/i/s/controller.do#filter/models")
