@@ -52,9 +52,6 @@ class TelegramNotifier:
         # /url <url>
         if context.args:
             new_url = " ".join(context.args).strip()
-            if "/i/s%7C" not in new_url:
-                await context.bot.send_message(chat_id=update.effective_chat.id, text=f"❌  Please set a filter.")
-                return
     
             with self._url_lock:
                 self._url = new_url
