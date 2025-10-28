@@ -11,7 +11,7 @@ class Settings:
     TELEGRAM_CHAT_ID: str = os.getenv("TELEGRAM_CHAT_ID")
     
     # Browser Configuration
-    URL: str = "https://vtp.audi.com/ademanlwb/i/s%7C10,AAEX,AACV,AAGJ,AAGI,AAGU,AAHA,AAGE,AAGZ,AAGG,AAFE,AAEZ,AAFD,AADQ,AACT,AAEY,AAGA,AAFZ,AAGF,AAGH/controller.do#filter/models"
+    URL: str = "https://vtp.audi.com/ademanlwb/i/s%7C10,AAGT,AAGU,AAHA,AAGE,AAGZ,AAGG,AAFE,AAEZ,AAFD,AAFX,AAFU,AADQ,AACT,AAEY,AAGA,AAFZ,AAGF,AAGH,AAFY,AAFV/controller.do#filter/models"
     USERNAME: str = os.getenv("VTP_USERNAME")
     PASSWORD: str = os.getenv("VTP_PASSWORD")
     
