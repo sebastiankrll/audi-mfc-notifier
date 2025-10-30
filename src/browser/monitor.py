@@ -1,4 +1,4 @@
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 import time
 import sys
 from selenium.webdriver.remote.webdriver import WebDriver
@@ -17,6 +17,7 @@ class BrowserMonitor:
         self.current_url = settings.URL
         self.previous_models = set()
         self._last_scheduled_check = datetime.now(timezone.utc)
+        self.offline_periods = self._parse_idle_periods()
 
     def run(self):
         self._log("Browser monitor started.")
@@ -34,7 +35,14 @@ class BrowserMonitor:
 
     def _monitoring_loop(self):
         self.driver.get(self.current_url)
+
         while self.notifier.is_running():
+            is_offline, seconds_until_end = self._is_idle_period()
+            if is_offline:
+                self._log("Offline period — idling...")
+                time.sleep(min(seconds_until_end, 300))
+                continue
+
             self._detect_site_status()
 
     def _detect_site_status(self):
@@ -58,8 +66,8 @@ class BrowserMonitor:
         except Exception:
             pass
 
-        self._log("Site unavailable — idling before retry.")
-        time.sleep(60)
+        self._log("Site unavailable — idling before retry...")
+        time.sleep(300)
         
     def _do_login(self):
         try:
@@ -119,3 +127,39 @@ class BrowserMonitor:
 
     def _log(self, message: str):
         print(f"{time.strftime('%Y-%m-%d %H:%M:%S')}: {message}")
+
+    def _parse_idle_periods(self):
+        periods = []
+        for period in self.settings.IDLE_PERIODS:
+            try:
+                start_str, end_str = period.split("-")
+                start_time = datetime.strptime(start_str.strip(), "%H:%M").time()
+                end_time = datetime.strptime(end_str.strip(), "%H:%M").time()
+                periods.append((start_time, end_time))
+            except Exception:
+                self.notifier.notify_error(context="invalid offline period format")
+                self._log(f"Invalid offline period format: {period}")
+        return periods
+    
+    def _is_idle_period(self) -> tuple[bool, float]:
+        now = datetime.now()
+        current_time = now.time()
+
+        for start_time, end_time in self.offline_periods:
+            if start_time <= end_time:
+                # Same day (e.g., 12:00-13:00)
+                if start_time <= current_time < end_time:
+                    end_datetime = datetime.combine(now.date(), end_time)
+                    seconds_left = (end_datetime - now).total_seconds()
+                    return True, seconds_left
+            else:
+                # Overnight (e.g., 22:30-06:00)
+                if current_time >= start_time or current_time < end_time:
+                    if current_time >= start_time:
+                        end_datetime = datetime.combine(now.date() + timedelta(days=1), end_time)
+                    else:
+                        end_datetime = datetime.combine(now.date(), end_time)
+                    seconds_left = (end_datetime - now).total_seconds()
+                    return True, seconds_left
+
+        return False, 0
