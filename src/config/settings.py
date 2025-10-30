@@ -16,6 +16,6 @@ class Settings:
     PASSWORD: str = os.getenv("VTP_PASSWORD")
     
     # Monitoring Configuration
-    REFRESH_INTERVAL: int = 5 # minimum is 5 seconds
-    SCHEDULED_CHECK_INTERVAL: int = 3600 * 1
+    REFRESH_INTERVAL: int = 5 # seconds (min. 5)
+    SCHEDULED_CHECK_INTERVAL: int = 1 # hours
     IDLE_PERIODS: List[str] = field(default_factory=lambda: []) # "HH:MM-HH:MM" (local time), separated by commas (e.g., ["22:30-06:00", "12:00-13:00"])

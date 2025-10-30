@@ -15,6 +15,7 @@ class BrowserMonitor:
         self.notifier = notifier
         self.settings = settings
         self.current_url = settings.URL
+        self.refresh_interval = max(self.settings.REFRESH_INTERVAL, 5)
         self.previous_models = set()
         self._last_scheduled_check = datetime.now(timezone.utc)
         self.offline_periods = self._parse_idle_periods()
@@ -24,14 +25,14 @@ class BrowserMonitor:
         
         while True:
             if not self.notifier.is_running():
-                time.sleep(self.settings.REFRESH_INTERVAL)
+                time.sleep(self.refresh_interval)
                 continue
 
             try:
                 self._monitoring_loop()
             except Exception:
                 self.notifier.notify_error(exc_info=sys.exc_info(), context="monitor setup/run")
-                time.sleep(self.settings.REFRESH_INTERVAL)
+                time.sleep(self.refresh_interval)
 
     def _monitoring_loop(self):
         self.driver.get(self.current_url)
@@ -47,7 +48,7 @@ class BrowserMonitor:
 
     def _detect_site_status(self):
         self.driver.refresh()
-        time.sleep(max(self.settings.REFRESH_INTERVAL, 5))
+        time.sleep(self.refresh_interval)
 
         try:
             if self.driver.find_element(By.CLASS_NAME, "login-button"):
@@ -86,7 +87,7 @@ class BrowserMonitor:
         now = datetime.now(timezone.utc)
         time_since_last_check = (now - self._last_scheduled_check).total_seconds()
 
-        if time_since_last_check >= self.settings.SCHEDULED_CHECK_INTERVAL:
+        if time_since_last_check >= self.settings.SCHEDULED_CHECK_INTERVAL * 3600:
             self._do_scheduled_check()
         
     def _do_scheduled_check(self):
