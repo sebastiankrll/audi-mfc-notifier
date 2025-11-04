@@ -17,5 +17,5 @@ class Settings:
     
     # Monitoring Configuration
     REFRESH_INTERVAL: int = 5 # seconds (min. 5)
-    SCHEDULED_CHECK_INTERVAL: int = 1 # hours
-    IDLE_PERIODS: List[str] = field(default_factory=lambda: []) # "HH:MM-HH:MM" (local time), separated by commas (e.g., ["22:30-06:00", "12:00-13:00"])
+    SCHEDULED_CHECK_INTERVAL: int = 12 # hours
+    IDLE_PERIODS: List[str] = field(default_factory=lambda: ["21:00-06:00"]) # "HH:MM-HH:MM" (local time), separated by commas (e.g., ["22:30-06:00", "12:00-13:00"])

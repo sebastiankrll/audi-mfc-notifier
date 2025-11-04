@@ -85,10 +85,12 @@ class BrowserMonitor:
 
     def _check_scheduled_runs(self):
         now = datetime.now(timezone.utc)
-        time_since_last_check = (now - self._last_scheduled_check).total_seconds()
-
-        if time_since_last_check >= self.settings.SCHEDULED_CHECK_INTERVAL * 3600:
-            self._do_scheduled_check()
+        
+        # Check if new hour compared to last check
+        if now.hour != self._last_scheduled_check.hour:
+            hours_since_last = (now - self._last_scheduled_check).total_seconds() / 3600
+            if hours_since_last >= self.settings.SCHEDULED_CHECK_INTERVAL:
+                self._do_scheduled_check()
         
     def _do_scheduled_check(self):
         self.driver.get("https://vtp.audi.com/ademanlwb/i/s/controller.do#filter/models")
