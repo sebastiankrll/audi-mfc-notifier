@@ -65,6 +65,7 @@ class BrowserMonitor:
                 self._check_models()
                 return
         except Exception:
+            self.notifier.notify_error(exc_info=sys.exc_info(), context="model check")
             pass
 
         self._log("Site unavailable — idling before retry...")
@@ -98,11 +99,9 @@ class BrowserMonitor:
         
         div = self.driver.find_element(By.CSS_SELECTOR, ".vtp-resultcount span.num")
 
-        self.notifier.send_notification(f"🕒  {time.strftime('%Y-%m-%d %H:%M:%S')}: {int(div.text.strip())} results found.")
+        self.notifier.send_notification(f"🕒  {time.strftime('%Y-%m-%d %H:%M')}: {int(div.text.strip())} results found.")
         self._last_scheduled_check = datetime.now(timezone.utc)
         self._log("Scheduled check completed.")
-
-        self.driver.get(self.current_url)
 
     def _handle_reset_request(self):
         if self.notifier.is_reset_requested():
@@ -111,7 +110,7 @@ class BrowserMonitor:
 
     def _handle_url_changes(self):
         new_url = self.notifier.get_url()
-        if new_url and new_url != self.current_url:
+        if new_url and new_url != self.driver.current_url:
             self.current_url = new_url
             self.previous_models.clear()
 
